@@ -1,7 +1,7 @@
-from django.shortcuts import render
+from django.forms.models import model_to_dict
 from django.http import HttpResponse
 from .models import Category, Product
-from django.core import serializers
+import json
 
 # Create your views here.
 
@@ -16,13 +16,21 @@ def ball(request):
 
 def category_data(request):
     data = Category.objects.all()
-    data_in_json = serializers.serialize("json", data)
-    return HttpResponse(data_in_json, content_type="application/json")
+    data_list = {}
+    for obj in data:
+        if obj.parent_category:
+            data_list.update({"category_name": obj.name, "parent_category": model_to_dict(obj.parent_category)})
+        else:
+            data_list.update({"category_name": obj.name, "parent_category": obj.parent_category})
+    return HttpResponse(json.dumps(data_list), content_type='application/json')
 
 
 def product_data(request):
-    all_objects = Product.objects.all()
-    parent_categories = Category.objects.filter(product__isnull=False)
-    data_in_json = serializers.serialize("json", [*all_objects, *parent_categories])
-
-    return HttpResponse(data_in_json, content_type="application/json")
+    data = Product.objects.all()
+    data_dict = []
+    for obj in data:
+        if obj. category:
+            data_dict.append({"product name": obj.name, "parent category": [model_to_dict(i) for i in obj.category.all()]})
+        else:
+            data_dict.append({"product name": obj.name, "parent category": obj.category})
+    return HttpResponse(json.dumps(data_dict), content_type="application/json")
