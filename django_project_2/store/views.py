@@ -19,7 +19,8 @@ def category_data(request):
     data_list = {}
     for obj in data:
         if obj.parent_category:
-            data_list.update({"category_name": obj.name, "parent_category": model_to_dict(obj.parent_category)})
+            data_list.update({"category_name": obj.name, "parent_category": model_to_dict(obj.parent_category),
+                              "products": [model_to_dict(i) for i in obj.products.all()]})
         else:
             data_list.update({"category_name": obj.name, "parent_category": obj.parent_category})
     return HttpResponse(json.dumps(data_list), content_type='application/json')
